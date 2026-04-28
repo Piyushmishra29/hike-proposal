@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I have a question for you...</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Quicksand', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #fff0f3 0%, #ffd6e0 50%, #ffc2d1 100%);
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* Flower cursor */
+  .cursor-flower {
+    position: fixed;
+    font-size: 1.6rem;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .cursor-trail {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    font-size: 1.1rem;
+    animation: trailFade 0.8s ease-out forwards;
+  }
+
+  @keyframes trailFade {
+    0% { opacity: 0.7; transform: scale(1) translateY(0); }
+    100% { opacity: 0; transform: scale(0.2) translateY(12px); }
+  }
+
+  /* Card */
+  .card {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 56px 48px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(219, 112, 147, 0.15), 0 0 0 1px rgba(255,182,193,0.4);
+    max-width: 500px;
+    width: 92%;
+    position: relative;
+    z-index: 10;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card.celebrate {
+    transform: scale(1.05);
+    box-shadow: 0 30px 80px rgba(219, 112, 147, 0.25);
+  }
+
+  .character {
+    font-size: 5.5rem;
+    margin-bottom: 12px;
+    animation: bounce 2.2s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+
+  .question {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #d6336c;
+    margin-bottom: 40px;
+    line-height: 1.4;
+  }
+
+  /* Buttons */
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .btn {
+    padding: 16px 52px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    font-family: 'Quicksand', sans-serif;
+    border-radius: 50px;
+    cursor: none;
+    border: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .btn-yes {
+    background: linear-gradient(135deg, #f783ac, #d6336c);
+    color: white;
+    box-shadow: 0 6px 24px rgba(214, 51, 108, 0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .btn-yes:hover {
+    transform: scale(1.06);
+    box-shadow: 0 8px 32px rgba(214, 51, 108, 0.5);
+  }
+  .btn-yes:active { transform: scale(0.97); }
+
+  .btn-no {
+    background: rgba(255, 228, 235, 0.95);
+    color: #b57a8f;
+    box-shadow: 0 4px 16px rgba(219, 112, 147, 0.15);
+    position: fixed;
+    z-index: 999;
+  }
+
+  .btn-no.animated {
+    transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .footer-text {
+    margin-top: 30px;
+    font-size: 1.15rem;
+    color: #d6336c;
+    opacity: 0.5;
+    font-style: italic;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+  }
+
+  /* Celebration */
+  .celebration { display: none; text-align: center; }
+  .celebration.active {
+    display: block;
+    animation: fadeInUp 0.8s ease;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .celebration h1 {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 3.5rem;
+    color: #d6336c;
+    margin-bottom: 14px;
+  }
+  .celebration p {
+    font-size: 1.3rem;
+    color: #e64980;
+    line-height: 1.7;
+  }
+  .celebration .big-emoji {
+    font-size: 4rem;
+    display: block;
+    margin: 16px 0;
+    animation: bounce 1.5s ease-in-out infinite;
+  }
+
+  .hearts-container {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 50;
+  }
+  .floating-heart {
+    position: absolute;
+    font-size: 2.2rem;
+    animation: heartFloat 3s ease-in forwards;
+    pointer-events: none;
+  }
+  @keyframes heartFloat {
+    0% { opacity: 1; transform: translateY(0) scale(0.5); }
+    50% { opacity: 1; transform: translateY(-40vh) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-80vh) scale(0.8); }
+  }
+
+  .ask-content { transition: opacity 0.5s ease; }
+  .ask-content.hidden { opacity: 0; pointer-events: none; position: absolute; }
+
+  /* Falling petals (mobile background) */
+  .falling-petal {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    animation: petalDrift linear infinite;
+  }
+
+  @keyframes petalDrift {
+    0% { transform: translateY(-5vh) translateX(0) rotate(0deg); opacity: 0; }
+    8% { opacity: 0.6; }
+    50% { transform: translateY(50vh) translateX(30px) rotate(180deg); opacity: 0.5; }
+    100% { transform: translateY(105vh) translateX(-15px) rotate(360deg); opacity: 0; }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    body { cursor: default; }
+    .cursor-flower, .cursor-trail { display: none !important; }
+
+    .card {
+      padding: 40px 28px;
+      border-radius: 22px;
+      width: 94%;
+    }
+    .character { font-size: 4rem; margin-bottom: 8px; }
+    .question { font-size: 1.8rem; margin-bottom: 28px; }
+    .btn { padding: 14px 40px; font-size: 1.15rem; }
+    .footer-text { font-size: 1rem; margin-top: 22px; }
+    .celebration h1 { font-size: 2.5rem; }
+    .celebration p { font-size: 1.1rem; }
+    .celebration .big-emoji { font-size: 3rem; }
+  }
+
+  @media (max-width: 380px) {
+    .card { padding: 32px 20px; }
+    .question { font-size: 1.5rem; margin-bottom: 24px; }
+    .btn { padding: 12px 32px; font-size: 1.05rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor-flower" id="cursorFlower">🌸</div>
+
+<div class="card" id="card">
+  <div class="ask-content" id="askContent">
+    <div class="character">🐻</div>
+    <h2 class="question">Cutie, will you go on a hike with me?</h2>
+    <div class="buttons" id="buttonsContainer">
+      <button class="btn btn-yes" id="btnYes" onclick="sayYes()">Yes!</button>
+      <span id="noAnchor" style="display:inline-block;width:0;height:0;"></span>
+    </div>
+    <p class="footer-text">Say Yes with caution</p>
+  </div>
+  <div class="celebration" id="celebration">
+    <span class="big-emoji">🎉🏔️</span>
+    <h1>Yayyyy!</h1>
+    <p>Pack your bags, we're going hiking! 🌄<br><br>
+    I promise the views won't be<br>as beautiful as you 💕</p>
+    <span class="big-emoji">🐻❤️</span>
+  </div>
+</div>
+
+<button class="btn btn-no" id="btnNo">No</button>
+<div class="hearts-container" id="heartsContainer"></div>
+
+<script>
+  const btnNo = document.getElementById('btnNo');
+  const btnYes = document.getElementById('btnYes');
+  const card = document.getElementById('card');
+  const cursorFlower = document.getElementById('cursorFlower');
+
+  // --- Detect touch device ---
+  const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+
+  // --- Flower cursor trail (desktop only) ---
+  if (!isTouch) {
+    let trailCounter = 0;
+    const trailFlowers = ['🌸', '🌷', '🌺', '🌼', '💮'];
+
+    document.addEventListener('mousemove', (e) => {
+      cursorFlower.style.left = (e.clientX - 13) + 'px';
+      cursorFlower.style.top = (e.clientY - 13) + 'px';
+
+      trailCounter++;
+      if (trailCounter % 5 === 0) {
+        const t = document.createElement('span');
+        t.className = 'cursor-trail';
+        t.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
+        t.style.left = (e.clientX - 9) + 'px';
+        t.style.top = (e.clientY - 9) + 'px';
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 800);
+      }
+    });
+  } else {
+    cursorFlower.style.display = 'none';
+  }
+
+  // --- Gentle emoji rain (mobile only) ---
+  if (isTouch) {
+    const rainEmojis = [
+      '🌸', '🌷', '🌺',
+      '🥾', '🏔️', '⛰️', '🌲', '🌿', '🍃',
+      '🎒', '🧭', '⛺', '🌄', '☀️', '✨'
+    ];
+    function spawnDrop() {
+      const drop = document.createElement('span');
+      drop.className = 'falling-petal';
+      drop.textContent = rainEmojis[Math.floor(Math.random() * rainEmojis.length)];
+      drop.style.left = Math.random() * 100 + '%';
+      drop.style.fontSize = (0.8 + Math.random() * 0.7) + 'rem';
+      drop.style.animationDuration = (7 + Math.random() * 8) + 's';
+      drop.style.animationDelay = '0s';
+      document.body.appendChild(drop);
+      const dur = parseFloat(drop.style.animationDuration) * 1000;
+      setTimeout(() => drop.remove(), dur);
+    }
+    for (let i = 0; i < 5; i++) setTimeout(() => spawnDrop(), i * 1000);
+    setInterval(spawnDrop, 3000);
+  }
+
+  // --- Position No button next to Yes on load ---
+  function positionNoNextToYes() {
+    const anchor = document.getElementById('noAnchor');
+    const rect = anchor.getBoundingClientRect();
+    const yesRect = btnYes.getBoundingClientRect();
+    btnNo.style.left = (yesRect.right + 20) + 'px';
+    btnNo.style.top = (yesRect.top + (yesRect.height - btnNo.offsetHeight) / 2) + 'px';
+  }
+  positionNoNextToYes();
+  window.addEventListener('resize', () => { if (dodgeCount === 0) positionNoNextToYes(); });
+
+  // Enable smooth transitions after initial placement
+  requestAnimationFrame(() => btnNo.classList.add('animated'));
+
+  // --- No button: discrete jump on hover ---
+  let dodgeCount = 0;
+  let cooldown = false;
+
+  const noTexts = ["No", "Are you sure?", "Really?", "Think again!", "Please? 🥺",
+    "Don't do this...", "I'll carry your bag!", "I'll bring snacks! 🍫",
+    "Pretty please? 🙏", "Just click Yes 😤"];
+
+  function jumpToRandomSpot() {
+    if (cooldown) return;
+    cooldown = true;
+
+    dodgeCount++;
+    if (dodgeCount < noTexts.length) {
+      btnNo.textContent = noTexts[dodgeCount];
+    }
+
+    const bw = btnNo.offsetWidth;
+    const bh = btnNo.offsetHeight;
+    const margin = 20;
+
+    const newX = margin + Math.random() * (window.innerWidth - bw - margin * 2);
+    const newY = margin + Math.random() * (window.innerHeight - bh - margin * 2);
+
+    btnNo.style.left = newX + 'px';
+    btnNo.style.top = newY + 'px';
+
+    setTimeout(() => { cooldown = false; }, 400);
+  }
+
+  btnNo.addEventListener('mouseenter', jumpToRandomSpot);
+
+  btnNo.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    jumpToRandomSpot();
+  }, { passive: false });
+
+  btnNo.addEventListener('click', (e) => {
+    e.preventDefault();
+    jumpToRandomSpot();
+  });
+
+  // --- Yes ---
+  function sayYes() {
+    document.getElementById('askContent').classList.add('hidden');
+    card.classList.add('celebrate');
+    if (btnNo.parentElement) btnNo.style.display = 'none';
+    document.body.style.cursor = 'default';
+    cursorFlower.style.display = 'none';
+
+    setTimeout(() => {
+      document.getElementById('celebration').classList.add('active');
+    }, 400);
+
+    launchConfetti();
+    spawnFloatingHearts();
+  }
+
+  function launchConfetti() {
+    const end = Date.now() + 4500;
+    confetti({ particleCount: 120, spread: 80, origin: { x: 0.5, y: 0.6 },
+      colors: ['#ff69b4','#ffb6c1','#ff1493','#ffc0cb','#fff','#ffd700'] });
+
+    setTimeout(() => {
+      confetti({ particleCount: 60, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff69b4','#ffb6c1'] });
+      confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff69b4','#ffb6c1'] });
+    }, 400);
+
+    const iv = setInterval(() => {
+      if (Date.now() > end) return clearInterval(iv);
+      confetti({ particleCount: 4, angle: 60 + Math.random() * 60, spread: 55,
+        origin: { x: Math.random(), y: Math.random() * 0.4 },
+        colors: ['#ff69b4','#ffb6c1','#ff1493','#ffc0cb','#ffd6e0','#fff'] });
+    }, 80);
+  }
+
+  function spawnFloatingHearts() {
+    const container = document.getElementById('heartsContainer');
+    const emojis = ['💕','❤️','💗','🌸','💖','✨'];
+    let count = 0;
+    const iv = setInterval(() => {
+      if (count > 25) return clearInterval(iv);
+      const h = document.createElement('span');
+      h.className = 'floating-heart';
+      h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      h.style.left = Math.random() * 100 + '%';
+      h.style.bottom = '-5%';
+      h.style.animationDuration = (2 + Math.random() * 2) + 's';
+      container.appendChild(h);
+      count++;
+      setTimeout(() => h.remove(), 4000);
+    }, 150);
+  }
+</script>
+</body>
+</html>
