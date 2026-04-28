@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I have a question for you...</title>
+<meta property="og:title" content="I have a question for you...">
+<meta property="og:description" content="Cutie, will you go on a hike with me?">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://indigo-frog-162979.hostingersite.com/">
+<link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;🏔️&lt;/text&gt;&lt;/svg&gt;">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -11,7 +16,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -75,7 +80,7 @@
   }
 
   .question {
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 2.6rem;
     font-weight: 700;
     color: #d6336c;
@@ -149,7 +154,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
   .celebration h1 {
-    font-family: 'Quicksand', sans-serif;
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 3.5rem;
     color: #d6336c;
     margin-bottom: 14px;
@@ -255,10 +260,14 @@
 <div class="hearts-container" id="heartsContainer"></div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
   const btnNo = document.getElementById('btnNo');
   const btnYes = document.getElementById('btnYes');
   const card = document.getElementById('card');
   const cursorFlower = document.getElementById('cursorFlower');
+  let hasCelebrated = false;
+  let confettiInterval = null;
+  let heartsInterval = null;
 
   // --- Detect touch device ---
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
@@ -274,6 +283,8 @@
 
       trailCounter++;
       if (trailCounter % 5 === 0) {
+        const trails = document.querySelectorAll('.cursor-trail');
+        if (trails.length > 40) trails[0].remove();
         const t = document.createElement('span');
         t.className = 'cursor-trail';
         t.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
@@ -357,9 +368,8 @@
   btnNo.addEventListener('mouseenter', jumpToRandomSpot);
 
   btnNo.addEventListener('touchstart', (e) => {
-    e.preventDefault();
     jumpToRandomSpot();
-  }, { passive: false });
+  }, { passive: true });
 
   btnNo.addEventListener('click', (e) => {
     e.preventDefault();
@@ -368,9 +378,12 @@
 
   // --- Yes ---
   function sayYes() {
+    if (hasCelebrated) return;
+    hasCelebrated = true;
+    btnYes.disabled = true;
     document.getElementById('askContent').classList.add('hidden');
     card.classList.add('celebrate');
-    if (btnNo.parentElement) btnNo.style.display = 'none';
+    btnNo.style.display = 'none';
     document.body.style.cursor = 'default';
     cursorFlower.style.display = 'none';
 
@@ -383,6 +396,7 @@
   }
 
   function launchConfetti() {
+    if (confettiInterval) clearInterval(confettiInterval);
     const end = Date.now() + 4500;
     confetti({ particleCount: 120, spread: 80, origin: { x: 0.5, y: 0.6 },
       colors: ['#ff69b4','#ffb6c1','#ff1493','#ffc0cb','#fff','#ffd700'] });
@@ -392,8 +406,12 @@
       confetti({ particleCount: 60, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff69b4','#ffb6c1'] });
     }, 400);
 
-    const iv = setInterval(() => {
-      if (Date.now() > end) return clearInterval(iv);
+    confettiInterval = setInterval(() => {
+      if (Date.now() > end) {
+        clearInterval(confettiInterval);
+        confettiInterval = null;
+        return;
+      }
       confetti({ particleCount: 4, angle: 60 + Math.random() * 60, spread: 55,
         origin: { x: Math.random(), y: Math.random() * 0.4 },
         colors: ['#ff69b4','#ffb6c1','#ff1493','#ffc0cb','#ffd6e0','#fff'] });
@@ -401,11 +419,16 @@
   }
 
   function spawnFloatingHearts() {
+    if (heartsInterval) clearInterval(heartsInterval);
     const container = document.getElementById('heartsContainer');
     const emojis = ['💕','❤️','💗','🌸','💖','✨'];
     let count = 0;
-    const iv = setInterval(() => {
-      if (count > 25) return clearInterval(iv);
+    heartsInterval = setInterval(() => {
+      if (count > 25) {
+        clearInterval(heartsInterval);
+        heartsInterval = null;
+        return;
+      }
       const h = document.createElement('span');
       h.className = 'floating-heart';
       h.textContent = emojis[Math.floor(Math.random() * emojis.length)];
@@ -417,6 +440,7 @@
       setTimeout(() => h.remove(), 4000);
     }, 150);
   }
+});
 </script>
 </body>
 </html>
