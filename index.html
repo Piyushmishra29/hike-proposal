@@ -242,7 +242,7 @@
     <div class="character">🐻</div>
     <h2 class="question">Cutie, will you go on a hike with me?</h2>
     <div class="buttons" id="buttonsContainer">
-      <button class="btn btn-yes" id="btnYes" onclick="sayYes()">Yes!</button>
+      <button class="btn btn-yes" id="btnYes">Yes!</button>
       <span id="noAnchor" style="display:inline-block;width:0;height:0;"></span>
     </div>
     <p class="footer-text">Say Yes with caution</p>
@@ -375,6 +375,8 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     jumpToRandomSpot();
   });
+
+  btnYes.addEventListener('click', sayYes);
 
   // --- Yes ---
   function sayYes() {
